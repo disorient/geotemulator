@@ -56,12 +56,13 @@ void draw() {
   cam.beginHUD();
   fill(255,255,255);
   textFont(font,8);
-  text("Mouse moves camera",0,10);
-  text("Arrows/A/Z moves octahedron",300,10);
-  text("Hold Command or Alt to rotate", 700, 10);
-  text("Brackets change octahedron",0,25);
-  text("+/DELETE add/remove octahedrons",300,25);
-  text("Shift/Control move more/less",700,25);
+  text("Mouse - Move camera",0,10);
+  text("Arrows/A/Z - Move octahedron",325,10);
+  text("Command/Alt - Rotate", 700, 10);
+  text("Brackets - Change octahedron",0,25);
+  text("+/DELETE - Add/remove octahedrons",325,25);
+  text("Shift/Control - Move more/less",700,25);
+  text("F - refocus camera", 0, 40);
   cam.endHUD();
 }
 
@@ -132,16 +133,22 @@ void keyPressed() {
     if (activeOcta < 0) {
       activeOcta = octas.size() - 1;
     }
+    octas.get(activeOcta).focus(cam);
+
   }
   else if (key == ']') {
     activeOcta++;
     if (activeOcta >= octas.size()) {
       activeOcta = 0;
     }
+    octas.get(activeOcta).focus(cam);
+
   }
   else if (key == '+') {
     octas.add(octa.clone());
     activeOcta = octas.size() - 1;
+    octas.get(activeOcta).focus(cam);
+
   }
   else if (keyCode == 8) {
     if (octas.size() > 1) {
@@ -151,7 +158,12 @@ void keyPressed() {
       if (activeOcta < 0) {
         activeOcta = octas.size() - 1;
       }
+      
+      octas.get(activeOcta).focus(cam);
     }
+  }
+  else if (keyCode == 70) {
+    octa.focus(cam);
   }
 }
 
@@ -225,5 +237,9 @@ class Octahedron {
     this.y += y;
     this.z += z;
   }
+  
+  public void focus(PeasyCam c) {
+    c.lookAt(this.x, this.y, this.z, 1000, 1500);
+  } 
 }
 
