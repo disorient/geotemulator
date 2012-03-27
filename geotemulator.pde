@@ -11,19 +11,21 @@ int activeOcta = 0;
 float magnitude = 10;
 float rmagnitude = PI/32;
 boolean rotationMode = false;
+PFont font;
 
 void setup() {
-  size(1000,1000,OPENGL);
+  size(1000, 1000, OPENGL);
   rectMode(CENTER);
   cam = new PeasyCam(this, 250, 250, 0, 1000);
   cam.setSuppressRollRotationMode();
-  
+
   octas = new ArrayList<Octahedron>();
-  
+
   octas.add(new Octahedron(250, 250, 0, 0, 0, 0, 300));
   octas.add(new Octahedron(250+300, 250, 0, 0, 0, 0, 300));
-  
-  groundTexture = loadImage("data/Lost Lake.jpg");
+
+  groundTexture = loadImage("data/Lost Lake.jpg");  
+  font = loadFont("data/04b20-8.vlw");
 }
 
 void draw() {
@@ -45,11 +47,22 @@ void draw() {
   vertex(-bound, .5, bound, 0, 1);
   endShape();
   popMatrix();
-  
+
   for (int i=0; i<octas.size(); i++) {
-      octas.get(i).setColor(i==activeOcta ? color(255,128,0) : color(255,64,64));
-      octas.get(i).draw();
+    octas.get(i).setColor(i==activeOcta ? color(255, 128, 0) : color(255, 64, 64));
+    octas.get(i).draw();
   }
+  
+  cam.beginHUD();
+  fill(255,255,255);
+  textFont(font,8);
+  text("Mouse moves camera",0,10);
+  text("Arrows/A/Z moves octahedron",300,10);
+  text("Hold Command or Alt to rotate", 700, 10);
+  text("Brackets change octahedron",0,25);
+  text("+/DELETE add/remove octahedrons",300,25);
+  text("Shift/Control move more/less",700,25);
+  cam.endHUD();
 }
 
 void keyReleased() {
@@ -67,7 +80,6 @@ void keyReleased() {
 void keyPressed() {
   Octahedron octa = octas.get(activeOcta);
 
-println(keyCode);  
   if (keyCode == SHIFT) {
     magnitude = 100;
     rmagnitude = PI/16;
@@ -80,40 +92,40 @@ println(keyCode);
     rotationMode = true;
   }
   else if (rotationMode && keyCode == UP) {
-    octa.addRotate(rmagnitude,0,0);
+    octa.addRotate(rmagnitude, 0, 0);
   }
   else if (rotationMode && keyCode == DOWN) {
-    octa.addRotate(-rmagnitude,0,0);
+    octa.addRotate(-rmagnitude, 0, 0);
   }
   else if (rotationMode && keyCode == LEFT) {
-    octa.addRotate(0,-rmagnitude,0);
+    octa.addRotate(0, -rmagnitude, 0);
   }
   else if (rotationMode && keyCode == RIGHT) {
-    octa.addRotate(0,rmagnitude,0);
+    octa.addRotate(0, rmagnitude, 0);
   }
   else if (rotationMode && keyCode == 65) {
-    octa.addRotate(0,0,-rmagnitude);
+    octa.addRotate(0, 0, -rmagnitude);
   }
   else if (rotationMode && keyCode == 90) {
-    octa.addRotate(0,0,rmagnitude);
+    octa.addRotate(0, 0, rmagnitude);
   }
   else if (!rotationMode && keyCode == UP) {
-    octa.addTranslate(0.0,-magnitude,0.0);
+    octa.addTranslate(0.0, -magnitude, 0.0);
   }
   else if (!rotationMode && keyCode == DOWN) {
-    octa.addTranslate(0.0,magnitude,0.0);
+    octa.addTranslate(0.0, magnitude, 0.0);
   }
   else if (!rotationMode && keyCode == LEFT) {
-    octa.addTranslate(-magnitude,0.0,0.0);
+    octa.addTranslate(-magnitude, 0.0, 0.0);
   }
   else if (!rotationMode && keyCode == RIGHT) {
-    octa.addTranslate(magnitude,0.0,0.0);
+    octa.addTranslate(magnitude, 0.0, 0.0);
   }
   else if (!rotationMode && keyCode == 65) {
-    octa.addTranslate(0,0,-magnitude);
+    octa.addTranslate(0, 0, -magnitude);
   }
   else if (!rotationMode && keyCode == 90) {
-    octa.addTranslate(0,0,magnitude);
+    octa.addTranslate(0, 0, magnitude);
   }
   else if (key == '[') {
     activeOcta--;
@@ -135,7 +147,7 @@ println(keyCode);
     if (octas.size() > 1) {
       octas.remove(activeOcta);
       activeOcta--;
-      
+
       if (activeOcta < 0) {
         activeOcta = octas.size() - 1;
       }
@@ -144,73 +156,74 @@ println(keyCode);
 }
 
 class Octahedron {
-    float x;
-    float y;
-    float z;
-    float rx;
-    float ry;
-    float rz;
-    float d;
-    color c;
-    
-    public Octahedron(float x, float y, float z, float rx, float ry, float rz, float d) {
-      this.x = x;
-      this.y = y;
-      this.z = z;
-      this.rx = rx;
-      this.ry = ry;
-      this.rz = rz;
-      this.d = d;
-      this.c = color(255,128,128);
-    }
-    
-    public Octahedron clone() {
-      Octahedron newOcta = new Octahedron(this.x, this.y, this.z, this.rx, this.ry, this.rz, this.d);
-      newOcta.addTranslate(30,-30,0);
-      return newOcta;
-    }
-    
-    public void draw() {
-      pushMatrix();
-      
-      translate(this.x, this.y, this.z);
-      rotateX(this.rx);
-      rotateY(this.ry);
-      rotateZ(this.rz);
+  float x;
+  float y;
+  float z;
+  float rx;
+  float ry;
+  float rz;
+  float d;
+  color c;
 
-      noFill();
-      stroke(this.c);
-      strokeWeight(10);
-      
-      rotateZ(radians(45));  
-      rect(0,0,this.d,this.d);
-      
-      rotateZ(radians(45));
-      rotateX(radians(45));
-      rotateY(radians(90));
-      rect(0,0,this.d,this.d);
-      
-      rotateZ(radians(45));
-      rotateX(radians(45));
-      rotateY(radians(90));
-      rect(0,0,this.d,this.d);
-      
-      popMatrix();
-    }
-    
-    public void setColor(color c) {
-      this.c = c;
-    }
-    
-    public void addRotate(float rx, float ry, float rz) {
-      this.rx += rx;
-      this.ry += ry;
-      this.rz += rz;
-    }
-    
-    public void addTranslate(float x, float y, float z) {
-      this.x += x;
-      this.y += y;
-      this.z += z;
-    }
+  public Octahedron(float x, float y, float z, float rx, float ry, float rz, float d) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.rx = rx;
+    this.ry = ry;
+    this.rz = rz;
+    this.d = d;
+    this.c = color(255, 128, 128);
+  }
+
+  public Octahedron clone() {
+    Octahedron newOcta = new Octahedron(this.x, this.y, this.z, this.rx, this.ry, this.rz, this.d);
+    newOcta.addTranslate(30, -30, 0);
+    return newOcta;
+  }
+
+  public void draw() {
+    pushMatrix();
+
+    translate(this.x, this.y, this.z);
+    rotateX(this.rx);
+    rotateY(this.ry);
+    rotateZ(this.rz);
+
+    noFill();
+    stroke(this.c);
+    strokeWeight(10);
+
+    rotateZ(radians(45));  
+    rect(0, 0, this.d, this.d);
+
+    rotateZ(radians(45));
+    rotateX(radians(45));
+    rotateY(radians(90));
+    rect(0, 0, this.d, this.d);
+
+    rotateZ(radians(45));
+    rotateX(radians(45));
+    rotateY(radians(90));
+    rect(0, 0, this.d, this.d);
+
+    popMatrix();
+  }
+
+  public void setColor(color c) {
+    this.c = c;
+  }
+
+  public void addRotate(float rx, float ry, float rz) {
+    this.rx += rx;
+    this.ry += ry;
+    this.rz += rz;
+  }
+
+  public void addTranslate(float x, float y, float z) {
+    this.x += x;
+    this.y += y;
+    this.z += z;
+  }
 }
+
